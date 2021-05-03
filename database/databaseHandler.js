@@ -3,7 +3,7 @@ const ObjectsToCsv = require('objects-to-csv');
 class Database {
     static async insertToDatabase(data, providerName) {
         const csv = new ObjectsToCsv(data);
-        await csv.toDisk(`./storage/${providerName}.csv`);
+        await csv.toDisk(path.join(__dirname, `/storage/${providerName}.csv`));
     }
 }
 

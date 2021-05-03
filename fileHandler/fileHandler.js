@@ -35,7 +35,7 @@ class FileHandler {
 
         if (result.errors && result.errors.length !== 0) {
             const errors = result.errors.map(error => `${error.argument}`).join(', ');
-            validationErrors = `Missing required fields: ${errors} in file`;
+            const validationErrors = `Missing required fields: ${errors} in file`;
             throw new Error(`${validationErrors}`);
         }
 

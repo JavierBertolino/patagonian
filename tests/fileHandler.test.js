@@ -134,7 +134,4 @@ describe('FileHandler', () => {
         test.value(response).value(mockedParsedData)
     })
 
-    it.only('When calling insertToDatabase, it stores the data in a .csv file in /storage directory', () => {
-
-    })
 })

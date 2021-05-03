@@ -2,9 +2,8 @@ const sinon = require('sinon');
 const { FileHandler } = require('../fileHandler/fileHandler');
 const path = require('path');
 const test = require('unit.js');
-const fs = require('fs');
-var parse = require('csv-parse/lib/sync');
-const { deepEqual } = require('should');
+const dataSchema = require('../schemas/income_data.schema.json');
+const { Database } = require('../database/databaseHandler');
 
 const mockedDataFromFile = [
     {
@@ -42,15 +41,16 @@ describe('FileHandler', () => {
         sinon.restore();
     });
 
-    it('When retreiveAndProcessData is called with a valid filePath, it returns a parsed data from that file', () => {
+    it('When retreiveAndProcessData is called with a valid filePath, it returns a parsed data from that file', async () => {
 
         // Arrange
         sinon.stub(FileHandler, '_retrieveDataFromFile').returns(mockedDataFromFile);
         sinon.stub(FileHandler, '_validateData').returns(undefined);
         sinon.stub(FileHandler, '_parseData').returns(mockedParsedData);
+        sinon.stub(Database, 'insertToDatabase');
 
         // Act
-        const response = FileHandler.retreiveAndProcessData(filePath);
+        const response = await FileHandler.retreiveAndProcessData(filePath);
 
         // Assert
         test.value(response).isEqualTo(mockedParsedData);
@@ -88,4 +88,53 @@ describe('FileHandler', () => {
         }
 
     });
+
+    it('When the data is missing fields, _validateData returns an error message with the missing fields', () => {
+        // Arrange
+        const mockedErrorData = [
+            {
+                UUID: 'dummy-value',
+                VIN: 'dummy-value',
+                Make: 'dummy-value',
+                Model: 'dummy-value',
+                Year: 123,
+                Price: 123,
+                'Zip Code': 123,
+                'Create Date': 123,
+            }
+        ];
+
+        const validationErrorMessage = `Missing required fields: Mileage, Update Date in file`;
+
+        // Act
+        try {
+            FileHandler._validateData(mockedErrorData, dataSchema);
+
+        } catch (error) {
+            // Assert
+            test.value(error.message).isEqualTo(validationErrorMessage);
+        }
+
+    });
+
+    it('When parseData is passed an object, it returns the parsed object with only the required properties and types', () => {
+        // Arrange
+        const mockedInputData = [
+            {
+                ...mockedDataFromFile,
+                'dummy-extra-property': 'dummy-value'
+            }
+
+        ];
+
+        // Act
+        const response = FileHandler._parseData(mockedInputData);
+
+        // Assert
+        test.value(response).value(mockedParsedData)
+    })
+
+    it.only('When calling insertToDatabase, it stores the data in a .csv file in /storage directory', () => {
+
+    })
 })

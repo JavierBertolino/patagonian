@@ -1,15 +1,14 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const sinon = require('sinon');
 const { FileHandler } = require('../fileHandler/fileHandler');
-const path = require('path');
 const supertest = require('supertest');
 const test = require('unit.js');
 
-const url = 'http://localhost:3000/upload?provider=mockedProvider';
+const url = `http://localhost:${process.env.PORT}/upload?provider=mockedProvider`;
 const request = supertest(url);
 
-
 describe('Server', () => {
-    const url = 'http://localhost:3000/upload?provider=mockedProvider';
 
     it('When file is uploaded correctly with the required parameters, returns 200 and success message', () => {
         // Arrange
@@ -29,7 +28,7 @@ describe('Server', () => {
         ];
 
         const expectedMessage = 'File uploaded successfully!';
-        sinon.stub(FileHandler, 'retreiveAndProcessData').returns(mockedData);
+        sinon.stub(FileHandler, 'retreiveAndProcessData').resolves(mockedData);
 
         // Act
         request.post(url)

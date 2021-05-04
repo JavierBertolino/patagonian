@@ -19,12 +19,10 @@ class FileHandler {
         try {
 
             const records = fs.readFileSync(filePath, 'utf8');
-            console.log(records);
             const data = parse(records, { columns: true });
 
             return data;
         } catch (error) {
-            console.log(error.message);
             throw new Error('Failed to open uploaded file');
         }
     }

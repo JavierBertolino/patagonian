@@ -5,14 +5,16 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads' });
 const app = express();
 const { FileHandler } = require('./fileHandler/fileHandler');
+const { Validations } = require('./validations');
 
 
 app.post('/upload', upload.single('file'), async function (req, res) {
     try {
+        Validations.validateRequest(req);
         const data = await FileHandler.retreiveAndProcessData(path.join(__dirname, req.file.path), req.query.provider);
         console.log(data);
-        res.status(200).send({message: 'File uploaded successfully!'});
-        
+        res.status(200).send({ message: 'File uploaded successfully!' });
+
     } catch (error) {
         console.log(error);
         res.status(400).send({ message: error.message });
@@ -24,3 +26,4 @@ app.listen(process.env.PORT, function () {
     console.log('Express server listening on', process.env.PORT);
 });
 
+module.exports = app;

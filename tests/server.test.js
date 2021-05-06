@@ -1,16 +1,12 @@
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
 const sinon = require('sinon');
 const { FileHandler } = require('../fileHandler/fileHandler');
-const supertest = require('supertest');
+const path = require('path');
+const request = require('supertest');
 const test = require('unit.js');
-
-const url = `http://localhost:${process.env.PORT}/upload?provider=mockedProvider`;
-const request = supertest(url);
+const app = require('../index');
 
 describe('Server', () => {
-
-    it('When file is uploaded correctly with the required parameters, returns 200 and success message', () => {
+    it('When file is uploaded correctly with the required parameters, returns 200 and success message', async () => {
         // Arrange
         const mockedData = [
             {
@@ -28,17 +24,15 @@ describe('Server', () => {
         ];
 
         const expectedMessage = 'File uploaded successfully!';
-        sinon.stub(FileHandler, 'retreiveAndProcessData').resolves(mockedData);
+        sinon.stub(FileHandler, 'retreiveAndProcessData').returns(mockedData);
 
         // Act
-        request.post(url)
+        const result = await request(app).post('/upload?provider=mockProvider')
             .attach('file', path.join(__dirname, 'mockedData.csv'))
-            .end(function (err, res) {
-
-                // Assert
-                test.value(res.status).isEqualTo(200);
-                test.value(res.body.message).isEqualTo(expectedMessage);
-            });
+            .expect(200)
+        // Assert
+        test.value(result.status).isEqualTo(200);
+        test.value(result.body.message).isEqualTo(expectedMessage);
 
     });
 })
